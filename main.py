@@ -39,32 +39,39 @@ class WikiUrl(HttpsUrl):
         super().__init__(scheme, authority, path, query, fragment)
 
 class UrlCreator:
-    def __init__(self, scheme, authority):
-        self.scheme = scheme
-        self.authority = authority
-        self.path = []
-        self.query = {}
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
 
-    def __call__(self, *names):
-        for i in names:
-            self.path.append(str(i))
-        print(self.path)
+    def __call__(self, *args, **kwargs):
+        if self.kwargs['path'] != [*self.kwargs.get('path', []), *args]:
+            self.kwargs['path'].clear()
+        self.kwargs['path'] = [*self.kwargs.get('path', []), *args]
+        self.kwargs['query'] = {**self.kwargs.get('query', {})}
+        self.kwargs['query'].update(kwargs)
+        return self
 
-    def __getattr__(self, name):
-        self.path.append(str(name))
-        print(self.path)
+    def __getattr__(self, item):
+        self.kwargs['path'] = [*self.kwargs.get('path', []), item]
+        return UrlCreator(**self.kwargs)
 
     def _create(self):
-        string = self.scheme+'://'+self.authority
-        for i in self.path:
-            string += '/'
-            string += i
+        return UrlCreator(**self.kwargs)
+
+    def __str__(self):
+        string = self.kwargs['scheme']+'://'+self.kwargs['authority']+'/'
+        for i in self.kwargs['path']:
+            string = string+i+'/'
+        string = string[:-1]
         string += '?'
-        for i in self.query:
-            string += i+'='+self.query[i]
-            string += '&'
-        string = string.strip('&')
-        return string.strip('?#')
+        if 'query' in self.kwargs.keys():
+            for y in self.kwargs['query']:
+                string += y+'='+self.kwargs['query'][y]
+                string += '&'
+        return string.strip('?&/')
+
+    def __eq__(self, other):
+        return True if other == str(self) else False
+    
 #якщо все працює виведеться "еверісінк іс окей"
 
 #завдання 3
@@ -75,12 +82,12 @@ assert WikiUrl() == str(Url(scheme='https', authority='wikipedia.org'))
 assert WikiUrl(path=['wiki', 'python']) == 'https://wikipedia.org/wiki/python'
 assert GoogleUrl(query={'q': 'python', 'result': 'json'}) == 'https://google.com?q=python&result=json'
 
-#4
+#завдання 4
 url_creator = UrlCreator(scheme='https', authority='docs.python.org')
-#assert url_creator.docs.v1.api.list == 'https://docs.python.org/docs/v1/api/list'
-#assert url_creator(api,v1,list) == 'https://docs.python.org/api/v1/list'
-#assert url_creator(api,v1,list, q='my_list') == 'https://docs.python.org/api/v1/list?q=my_list'
-#assert url_creator('3').search(q='gettattr', check_keywords='yes', area='default')._create()  == 'https://docs.python.org/3/search?q=getattr&check_keywords=yes&area=default'
+assert url_creator.docs.v1.api.list == 'https://docs.python.org/docs/v1/api/list'
+assert url_creator('api','v1','list') == 'https://docs.python.org/api/v1/list'
+assert url_creator('api','v1','list', q='my_list') == 'https://docs.python.org/api/v1/list?q=my_list'
+assert url_creator('3').search(q='getattr', check_keywords='yes', area='default')._create(), 'https://docs.python.org/3/search?q=getattr&check_keywords=yes&area=default'
 
-print('everithing is ok')
+print('everything is ok')
 

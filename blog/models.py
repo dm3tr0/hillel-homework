@@ -7,10 +7,10 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     text = models.TextField()
     creation_date = models.DateField(default=timezone.now)
-    publishing_date = models.DateField(blank=True, null=True)
+    published_date = models.DateField(blank=True, null=True)
 
     def publish(self):
-        self.publishing_date = timezone.now()
+        self.published_date = timezone.now()
         self.save()
 
     def __str__(self):

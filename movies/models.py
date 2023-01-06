@@ -1,5 +1,4 @@
 from django.db import models
-import csv
 
 class Movie(models.Model):
     id = models.CharField(max_length=256, primary_key=True)

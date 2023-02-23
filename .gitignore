@@ -11,6 +11,7 @@ mdb/
 __pycache__
 db.sqlite3
 media
+*.sqlite3
 
 # Backup files # 
 *.bak 
@@ -54,6 +55,7 @@ atlassian-ide-plugin.xml
 # Python # 
 *.py[cod] 
 *$py.class 
+*.pyc
 
 # Distribution / packaging 
 .Python build/ 
